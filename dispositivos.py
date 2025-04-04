@@ -1,5 +1,7 @@
+from collections import deque
+
 def mostrar_menu():
-    print("Opciones:")
+    print("\nOpciones:")
     print("1. Registrar dispositivo")
     print("2. Prestar un dispositivo")
     print("3. Devolver un dispositivo")
@@ -9,232 +11,259 @@ def mostrar_menu():
 
 
 def registrar_dispositivo(inventario):
-    print("\nSeleccione el tipo de dispositivo a registrar:")
-    print("1. PC")
-    print("2. Tablet")
-    opcion = input("Seleccione una opción: ")
+    while True:
+        print("\nSeleccione el tipo de dispositivo a registrar:")
+        print("1. PC")
+        print("2. Tablet")
+        opcion = input("Seleccione una opción: ")
 
-    if opcion == "1":
-        serial = input("Ingrese el serial del dispositivo: ")
-        if serial in inventario:
-            print("El serial ya existe en el inventario.")
-            return
+        if opcion not in ["1", "2"]:
+            print("Opción no válida. Intente de nuevo.")
+            continue
 
-        marca = input("ingrese la marca del dispositivo: ")
+        dispositivo = {}
+        if opcion == "1":
+            dispositivo["tipo"] = "PC"
+        else:
+            dispositivo["tipo"] = "Tablet"
+
+        dispositivo["serial"] = input("Ingrese el serial del dispositivo: ")
+        for item in inventario:
+            if item["serial"] == dispositivo["serial"]:
+                print("El serial ya existe en el inventario.")
+                return
+
+        dispositivo["marca"] = input("Ingrese la marca del dispositivo: ")
+
+        if dispositivo["tipo"] == "PC":
+            while True:
+                try:
+                    dispositivo["memoria_ram"] = int(input("Ingrese la memoria RAM: "))
+                    if dispositivo["memoria_ram"] < 0:
+                        print("La memoria RAM no puede ser negativa. Intente de nuevo.")
+                        continue
+                    break
+                except ValueError:
+                    print("Error: Asegúrese de ingresar un número válido.")
+
+            while True:
+                try:
+                    dispositivo["disco_duro"] = int(input("Ingrese el tamaño del disco duro: "))
+                    if dispositivo["disco_duro"] < 0:
+                        print("El tamaño del disco duro no puede ser negativo. Intente de nuevo.")
+                        continue
+                    break
+                except ValueError:
+                    print("Error: Asegúrese de ingresar un número válido.")
+        else:
+            while True:
+                try:
+                    dispositivo["tamano"] = float(input("Ingrese el tamaño de la tablet (en pulgadas): "))
+                    if dispositivo["tamano"] < 0:
+                        print("El tamaño de la tablet no puede ser negativo. Intente de nuevo.")
+                        continue
+                    break
+                except ValueError:
+                    print("Error: Asegúrese de ingresar un número válido.")
+
         while True:
             try:
-                memoria_ram = int(input("Ingrese la memoria_ram: "))
-                if memoria_ram < 0:
-                    print("Error: La memoria_ram no puede ser negativa.")
+                dispositivo["precio"] = float(input("Ingrese el precio del dispositivo: "))
+                if dispositivo["precio"] < 0:
+                    print("El precio no puede ser negativo. Intente de nuevo.")
                     continue
                 break
             except ValueError:
                 print("Error: Asegúrese de ingresar un número válido.")
 
-        while True:
-            try:
-                disco_duro = int(input("Ingrese el disco duro: "))
-                if disco_duro < 0:
-                    print("Error: El disco duro no puede ser negativo.")
-                    continue
-                break
-            except ValueError:
-                print("Error: Asegúrese de ingresar un número válido.")
+        dispositivo["nombre_usuario"] = ""
+        dispositivo["disponible"] = True
 
-        while True:
-            try:
-                precio = float(input("Ingrese el precio del producto: "))
-                if precio < 0:
-                    print("Error: El precio no puede ser negativo.")
-                    continue
-                break
-            except ValueError:
-                print("Error: Asegúrese de ingresar un número válido.")
-
-        nombre_usuario = input("Ingrese el nombre del usuario: ")
-        while True:
-            try:
-                disponible = bool(input("Ingrese si el dispositivo esta disponible (True/False): "))
-                if disponible != True and disponible != False:
-                    print("Error: El valor ingresado no es valido.")
-                    continue
-                break
-            except ValueError:
-                print("Error: Asegúrese de ingresar un valor booleano.")
+        inventario.append(dispositivo)
+        print("**** Dispositivo registrado exitosamente. ****")
+        break
 
 
-        inventario[serial] = {"marca": marca, "memoria_ram": memoria_ram, "disco_duro": disco_duro, "precio": precio, "nombre_usuario": nombre_usuario, "disponible": disponible}
-        print("Producto registrado exitosamente.")
-
-    elif opcion == "2":
-        serial = input("Ingrese el serial del dispositivo: ")
-        if serial in inventario:
-            print("El serial ya existe en el inventario.")
-            return
-
-        marca = input("ingrese la marca del dispositivo: ")
-        while True:
-            try:
-                tamano = float(input("Ingrese el tamaño del dispositivo: "))
-                if tamano < 0:
-                    print("Error: El tamaño no puede ser negativo.")
-                    continue
-                break
-            except ValueError:
-                print("Error: Asegúrese de ingresar un número válido.")
-
-        while True:
-            try:
-                precio = float(input("Ingrese el precio del dispositivo: "))
-                if precio < 0:
-                    print("Error: El precio no puede ser negativo.")
-                    continue
-                break
-            except ValueError:
-                print("Error: Asegúrese de ingresar un número válido.")
-
-        nombre_usuario = input("Ingrese el nombre del usuario: ")
-        while True:
-            try:
-                disponible = bool(input("Ingrese si el dispositivo esta disponible (True/False): "))
-                if disponible != True and disponible != False:
-                    print("Error: El valor ingresado no es valido.")
-                    continue
-                break
-            except ValueError:
-                print("Error: Asegúrese de ingresar un valor booleano.")
-
-        inventario[serial] = {"marca": marca, "tamano": tamano, "precio": precio, "nombre_usuario": nombre_usuario, "disponible": disponible}
-        print("Producto registrado exitosamente.")
-
-
-def prestar_dispositivo(inventario):
+def prestar_dispositivo(inventario, prestamos):
     serial = input("Ingrese el serial del dispositivo a prestar: ")
-    if serial not in inventario:
-        print("El serial no existe en el inventario.")
-        return
-    
-    if inventario[serial]["disponible"] == False:
-        print("El dispositivo no esta disponible.")
-        return
-    
-    nombre_usuario = input("Ingrese el nombre del usuario que va a prestar el dispositivo: ")
-    inventario[serial]["nombre_usuario"] = nombre_usuario
-    inventario[serial]["disponible"] = False
-    print("Dispositivo prestado exitosamente.")
-    print(f"El dispositivo se prestó a {nombre_usuario} con el serial {serial}")
+
+    for dispositivo in inventario:
+        if dispositivo["serial"] == serial:
+            if not dispositivo["disponible"]:
+                print("El dispositivo no está disponible.")
+                return
+
+            nombre_usuario = input("Ingrese el nombre del usuario que va a prestar el dispositivo: ")
+            dispositivo["nombre_usuario"] = nombre_usuario
+            dispositivo["disponible"] = False
+            prestamos.append(dispositivo)
+            print("**** Dispositivo prestado exitosamente. ****")
+            print(f"El dispositivo se prestó a {nombre_usuario} con el N° de serial {serial}")
+            return
+
+    print("El serial no existe en el inventario.")
 
 
-def devolver_dispositivo(inventario):
-    serial = input("Ingrese el serial del dispositivo a devolver: ")
-    if serial not in inventario:
-        print("El serial no existe en el inventario.")
+def devolver_dispositivo(inventario, prestamos):
+    if not prestamos:
+        print("No hay dispositivos en préstamo.")
         return
-    
-    if inventario[serial]["disponible"] == True:
-        print("El dispositivo ya esta disponible.")
+
+    dispositivo_serial = input("Ingrese el serial del dispositivo a devolver: ")
+
+    dispositivo_a_devolver = None
+    for dispositivo in prestamos:
+        if dispositivo["serial"] == dispositivo_serial:
+            dispositivo_a_devolver = dispositivo
+            break
+
+    if not dispositivo_a_devolver:
+        print("El serial no existe en los préstamos.")
         return
-    
-    inventario[serial]["nombre_usuario"] = ""
-    inventario[serial]["disponible"] = True
-    print("Dispositivo devuelto exitosamente.")
-    print(f"El dispositivo con serial {serial} está disponible: {inventario[serial]['disponible']}")
+
+    prestamos.remove(dispositivo_a_devolver)
+
+    for item in inventario:
+        if item["serial"] == dispositivo_a_devolver["serial"]:
+            item["nombre_usuario"] = ""
+            item["disponible"] = True
+            print(f"**** Dispositivo con serial {item['serial']} devuelto exitosamente. ****")
+            return
 
 
-def modificar_dispositivo_pc(inventario):
+def modificar_dispositivo(inventario):
     serial = input("Ingrese el serial del dispositivo a modificar: ")
-    if serial not in inventario:
+
+    dispositivo_a_modificar = None
+    for dispositivo in inventario:
+        if dispositivo["serial"] == serial:
+            dispositivo_a_modificar = dispositivo
+            break
+
+    if not dispositivo_a_modificar:
         print("El serial no existe en el inventario.")
         return
-    print("Datos actuales:", inventario[serial])
 
-    marca = input("Ingrese la nueva marca del dispositivo: ")
+    print("Datos actuales del dispositivo:")
+    for key, value in dispositivo_a_modificar.items():
+        print(f"{key}: {value}")
+
+    print("\nIngrese los nuevos valores del dispositivo. ")
+    nueva_marca = input("Nueva marca: ")
+    if nueva_marca:
+        dispositivo_a_modificar["marca"] = nueva_marca
+
+    if dispositivo_a_modificar["tipo"] == "PC":
+        while True:
+            nueva_memoria_ram = input("Nueva memoria RAM: ")
+            if nueva_memoria_ram:
+                try:
+                    nueva_memoria_ram = int(nueva_memoria_ram)
+                    if nueva_memoria_ram < 0:
+                        print("La memoria RAM no puede ser negativa. Intente de nuevo.")
+                        continue
+                    dispositivo_a_modificar["memoria_ram"] = nueva_memoria_ram
+                    break
+                except ValueError:
+                    print("Error: Asegúrese de ingresar un número válido.")
+            else:
+                break
+
+        while True:
+            nuevo_disco_duro = input("Nuevo tamaño del disco duro: ")
+            if nuevo_disco_duro:
+                try:
+                    nuevo_disco_duro = int(nuevo_disco_duro)
+                    if nuevo_disco_duro < 0:
+                        print("El tamaño del disco duro no puede ser negativo. Intente de nuevo.")
+                        continue
+                    dispositivo_a_modificar["disco_duro"] = nuevo_disco_duro
+                    break
+                except ValueError:
+                    print("Error: Asegúrese de ingresar un número válido.")
+            else:
+                break
+    else:
+        while True:
+            nuevo_tamano = input("Nuevo tamaño de la tablet (en pulgadas): ")
+            if nuevo_tamano:
+                try:
+                    nuevo_tamano = float(nuevo_tamano)
+                    if nuevo_tamano < 0:
+                        print("El tamaño de la tablet no puede ser negativo. Intente de nuevo.")
+                        continue
+                    dispositivo_a_modificar["tamano"] = nuevo_tamano
+                    break
+                except ValueError:
+                    print("Error: Asegúrese de ingresar un número válido.")
+            else:
+                break
+
     while True:
-        try:
-            memoria_ram = int(input("Ingrese la nueva memoria_ram: "))
-            if memoria_ram < 0:
-                print("Error: La memoria_ram no puede ser negativa.")
-                continue
+        nuevo_precio = input("Nuevo precio: ")
+        if nuevo_precio:
+            try:
+                nuevo_precio = float(nuevo_precio)
+                if nuevo_precio < 0:
+                    print("El precio no puede ser negativo. Intente de nuevo.")
+                    continue
+                dispositivo_a_modificar["precio"] = nuevo_precio
+                break
+            except ValueError:
+                print("Error: Asegúrese de ingresar un número válido.")
+        else:
             break
-        except ValueError:
-            print("Error: Asegúrese de ingresar un número válido.")
+
+    nuevo_nombre_usuario = input("Nuevo nombre del usuario: ")
+    if nuevo_nombre_usuario:
+        dispositivo_a_modificar["nombre_usuario"] = nuevo_nombre_usuario
 
     while True:
-        try:
-            disco_duro = int(input("Ingrese el nuevo disco duro: "))
-            if disco_duro < 0:
-                print("Error: El disco duro no puede ser negativo.")
-                continue
+        nuevo_disponible = input("¿Está disponible el dispositivo? (True/False): ").strip().lower()
+        if nuevo_disponible == "true":
+            dispositivo_a_modificar["disponible"] = True
             break
-        except ValueError:
-            print("Error: Asegúrese de ingresar un número válido.")
-
-    while True:
-        try:
-            precio = float(input("Ingrese el nuevo precio del producto: "))
-            if precio < 0:
-                print("Error: El precio no puede ser negativo.")
-                continue
+        elif nuevo_disponible == "false":
+            dispositivo_a_modificar["disponible"] = False
             break
-        except ValueError:
-            print("Error: Asegúrese de ingresar un número válido.")
-
-    nombre_usuario = input("Ingrese el nuevo nombre del usuario: ")
-    
-    while True:
-        try:
-            disponible = bool(input("Ingrese si el dispositivo esta disponible (True/False): "))
-            if disponible != True and disponible != False:
-                print("Error: El valor ingresado no es valido.")
-                continue
+        elif not nuevo_disponible:
             break
-        except ValueError:
-            print("Error: Asegúrese de ingresar un valor booleano.")
+        else:
+            print("Error: Debe ingresar 'True' o 'False'.")
 
-    if marca:
-        inventario[serial]["marca"] = marca
-    if memoria_ram:
-        inventario[serial]["memoria_ram"] = memoria_ram
-    if disco_duro:
-        inventario[serial]["disco_duro"] = disco_duro
-    if precio:
-        inventario[serial]["precio"] = precio
-    if nombre_usuario:
-        inventario[serial]["nombre_usuario"] = nombre_usuario
-    if disponible:
-        inventario[serial]["disponible"] = disponible
-    
-    print("Dispositivo modificado exitosamente.")
+    print("**** Dispositivo modificado exitosamente. ****")
 
 
 def mostrar_inventario(inventario):
     if not inventario:
         print("El inventario está vacío.")
         return
-    print("Inventario:")
 
-    if inventario:
-        for serial, dispositivo in inventario.items():
-            print(f"Serial: {serial}")
-            for key, value in dispositivo.items():
+    print("\nInventario:")
+    for dispositivo in inventario:
+        print(f"Serial: {dispositivo['serial']}")
+        for key, value in dispositivo.items():
+            if key != "serial":
                 print(f"{key}: {value}")
+        print("-" * 20)
 
 
 def main():
-    inventario = {}
+    inventario = []  # Pila para almacenar los dispositivos
+    prestamos = deque()  # Cola para gestionar los préstamos
 
     while True:
         mostrar_menu()
-        opcion = input("Seleccione una opción: ")
+        opcion = input("\nSeleccione una opción: ")
 
         if opcion == "1":
             registrar_dispositivo(inventario)
         elif opcion == "2":
-            prestar_dispositivo(inventario)
+            prestar_dispositivo(inventario, prestamos)
         elif opcion == "3":
-            devolver_dispositivo(inventario)
+            devolver_dispositivo(inventario, prestamos)
         elif opcion == "4":
-            modificar_dispositivo_pc(inventario)
+            modificar_dispositivo(inventario)
         elif opcion == "5":
             mostrar_inventario(inventario)
         elif opcion == "6":
